@@ -1,11 +1,13 @@
 use abstract_game::{
   test_games::{TTTMove, TicTacToe},
-  Game, ScoreValue, SimpleSolver, Solver,
+  Game, ScoreValue, Solver,
 };
 
 use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
+
+use crate::test::solvers::simple::SimpleSolver;
 
 #[template]
 #[rstest]

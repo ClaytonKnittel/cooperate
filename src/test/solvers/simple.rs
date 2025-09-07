@@ -55,9 +55,11 @@ impl Solver for SimpleSolver {
 
 #[cfg(test)]
 mod tests {
-  use abstract_game::{test_games::Nim, ScoreValue, SimpleSolver, Solver};
+  use abstract_game::{test_games::Nim, ScoreValue, Solver};
 
   use googletest::{gtest, prelude::*};
+
+  use crate::test::solvers::simple::SimpleSolver;
 
   #[gtest]
   fn test_solve_nim() {
