@@ -10,3 +10,8 @@ abstract_game = { git = "https://github.com/ClaytonKnittel/abstract-game.git", r
 crossbeam-queue = "0.3"
 dashmap = "5.5"
 rand = "0.8"
+
+[dev-dependencies]
+googletest = "0.14.2"
+rstest = "0.26.1"
+rstest_reuse = "0.7.0"
