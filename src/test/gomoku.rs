@@ -1,8 +1,11 @@
-use std::{fmt::Display, hash::Hash};
+use std::{
+  fmt::{Debug, Display},
+  hash::Hash,
+};
 
 use abstract_game::{Game, GameMoveIterator, GamePlayer, GameResult};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug, Copy)]
 pub struct GomokuMove {
   x: u32,
   y: u32,
@@ -217,5 +220,11 @@ impl Display for Gomoku {
       }
     }
     Ok(())
+  }
+}
+
+impl Debug for Gomoku {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{self}")
   }
 }

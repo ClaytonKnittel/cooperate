@@ -1,8 +1,11 @@
-use std::{fmt::Display, hash::Hash};
+use std::{
+  fmt::{Debug, Display},
+  hash::Hash,
+};
 
 use abstract_game::{Game, GameMoveIterator, GamePlayer, GameResult, Score};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug, Copy)]
 pub struct NimMove {
   sticks: u32,
 }
@@ -111,5 +114,11 @@ impl Eq for Nim {}
 impl Display for Nim {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     write!(f, "{} (turn {})", self.sticks, self.turn)
+  }
+}
+
+impl Debug for Nim {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{self}")
   }
 }

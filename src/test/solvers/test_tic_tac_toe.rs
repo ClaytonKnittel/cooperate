@@ -7,11 +7,11 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::simple::SimpleSolver;
+use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver};
 
 #[template]
 #[rstest]
-fn solvers(#[values(SimpleSolver)] solver: (impl Solver)) {}
+fn solvers(#[values(SimpleSolver, AlphaBeta)] solver: (impl Solver)) {}
 
 #[apply(solvers)]
 #[gtest]
