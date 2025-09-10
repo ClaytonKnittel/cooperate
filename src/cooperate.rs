@@ -7,7 +7,7 @@ use std::{
 };
 
 use abstract_game::{Game, GameResult, Score, ScoreValue};
-use rand::prelude::*;
+use rand::{rng, Rng};
 
 use crate::{
   global_data::GlobalData,
@@ -73,9 +73,9 @@ where
     hasher,
   ));
 
-  let mut rng = thread_rng();
+  let mut rng = rng();
   for stack in generate_frontier(game.clone(), &options).into_iter() {
-    let rand_idx = rng.gen_range(0..options.num_threads);
+    let rand_idx = rng.random_range(0..options.num_threads);
     globals
       .queue(rand_idx)
       .push(unsafe { NullLock::new(stack) });
