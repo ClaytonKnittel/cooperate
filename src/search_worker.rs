@@ -212,7 +212,7 @@ mod tests {
       // unsure if there's a way to win in fewer turns). We expect them to be
       // compatible.
       assert!(
-        state.value().compatible(&expected_score),
+        state.value().compatible(expected_score),
         "Expect computed score {} to be compatible with true score {}",
         state.value(),
         expected_score
@@ -256,7 +256,7 @@ mod tests {
       });
 
       assert!(
-        state.value().compatible(&expected_score),
+        state.value().compatible(expected_score),
         "Expect computed score {} to be compatible with true score {} for state\n{}",
         state.value(),
         expected_score,

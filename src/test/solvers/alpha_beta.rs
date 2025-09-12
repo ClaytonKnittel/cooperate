@@ -23,7 +23,7 @@ impl AlphaBeta {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     debug_assert!(alpha <= beta);
     if depth == 0 {
-      return Score::no_info();
+      return Score::NO_INFO;
     }
 
     let mut best_score = Score::lose(1);
@@ -43,7 +43,7 @@ impl Solver for AlphaBeta {
   fn best_move<G: Game>(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     if depth == 0 {
-      return (Score::no_info(), None);
+      return (Score::NO_INFO, None);
     }
 
     let mut alpha = Score::lose(1);

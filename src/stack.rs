@@ -115,7 +115,7 @@ where
       game,
       move_gen: None,
       current_move: None,
-      best_score: Score::no_info(),
+      best_score: Score::NO_INFO,
       best_move: None,
       dependents: null_mut(),
     };
@@ -150,7 +150,7 @@ where
   /// Updates the best score/move pair of this frame if `score` is better than
   /// the current best score, and advances the current move to the next move.
   fn update_score_and_advance(&mut self, score: Score) {
-    if self.best_move.is_none() || score.better(&self.best_score) {
+    if self.best_move.is_none() || score.better(self.best_score) {
       // println!(
       //   "    Updating {} ({}) to {} ({}) for\n{}\n",
       //   if self.best_move.is_none() {

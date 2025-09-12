@@ -30,10 +30,9 @@ impl GomokuMoveIter {
 }
 
 impl GameMoveIterator for GomokuMoveIter {
-  type Item = GomokuMove;
   type Game = Gomoku;
 
-  fn next(&mut self, gomoku: &Gomoku) -> Option<Self::Item> {
+  fn next(&mut self, gomoku: &Gomoku) -> Option<GomokuMove> {
     while self.y < gomoku.height && gomoku.tile_at(self.x, self.y) != GomokuTile::Empty {
       self.inc(gomoku);
     }
@@ -117,8 +116,8 @@ impl Game for Gomoku {
   type Move = GomokuMove;
   type MoveGenerator = GomokuMoveIter;
 
-  fn move_generator(&self) -> Self::MoveGenerator {
-    Self::MoveGenerator { x: 0, y: 0 }
+  fn move_generator(&self) -> GomokuMoveIter {
+    GomokuMoveIter { x: 0, y: 0 }
   }
 
   fn make_move(&mut self, m: Self::Move) {

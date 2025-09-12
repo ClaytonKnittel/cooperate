@@ -43,6 +43,6 @@ fn test_solve(solvers: (impl Solver, impl Solver), starting_state: (impl Game<Mo
 
     assert!(score1.determined(depth), "Failed on trial {trial}");
     assert!(score2.determined(depth), "Failed on trial {trial}");
-    assert!(score1.compatible(&score2), "Failed on trial {trial}");
+    assert!(score1.compatible(score2), "Failed on trial {trial}");
   }
 }

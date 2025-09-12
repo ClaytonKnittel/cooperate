@@ -22,10 +22,9 @@ pub struct NimMoveIter {
 }
 
 impl GameMoveIterator for NimMoveIter {
-  type Item = NimMove;
   type Game = Nim;
 
-  fn next(&mut self, _nim: &Nim) -> Option<Self::Item> {
+  fn next(&mut self, _nim: &Nim) -> Option<NimMove> {
     if self.sticks > self.max_sticks {
       None
     } else {
@@ -51,10 +50,10 @@ impl Nim {
   pub fn expected_score(&self) -> Score {
     if self.sticks % 3 == 0 {
       let turn_count_win = self.sticks * 2 / 3;
-      Score::new(false, turn_count_win - 1, turn_count_win)
+      Score::optimal_lose(turn_count_win)
     } else {
       let turn_count_win = self.sticks / 3 * 2;
-      Score::new(true, turn_count_win, turn_count_win + 1)
+      Score::optimal_win(turn_count_win + 1)
     }
   }
 }
@@ -63,7 +62,7 @@ impl Game for Nim {
   type Move = NimMove;
   type MoveGenerator = NimMoveIter;
 
-  fn move_generator(&self) -> Self::MoveGenerator {
+  fn move_generator(&self) -> NimMoveIter {
     NimMoveIter {
       sticks: 1,
       max_sticks: self.sticks.min(2),

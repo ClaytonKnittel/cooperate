@@ -32,10 +32,9 @@ impl TttMoveIter {
 }
 
 impl GameMoveIterator for TttMoveIter {
-  type Item = TttMove;
   type Game = Ttt;
 
-  fn next(&mut self, ttt: &Ttt) -> Option<Self::Item> {
+  fn next(&mut self, ttt: &Ttt) -> Option<TttMove> {
     while self.y < 3 && ttt.tile_at(self.x, self.y) != TttTile::Empty {
       self.inc();
     }
@@ -120,8 +119,8 @@ impl Game for Ttt {
   type Move = TttMove;
   type MoveGenerator = TttMoveIter;
 
-  fn move_generator(&self) -> Self::MoveGenerator {
-    Self::MoveGenerator { x: 0, y: 0 }
+  fn move_generator(&self) -> TttMoveIter {
+    TttMoveIter { x: 0, y: 0 }
   }
 
   fn make_move(&mut self, m: Self::Move) {

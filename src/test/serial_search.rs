@@ -13,7 +13,7 @@ where
   H: BuildHasher + Clone,
 {
   if let Some(cached_score) = table.get(&game) {
-    debug_assert!(cached_score.compatible(&score));
+    debug_assert!(cached_score.compatible(score));
   }
   table.update(game, score);
 }
@@ -34,7 +34,7 @@ where
   debug_assert!(game.finished() == GameResult::NotFinished);
 
   if depth == 0 {
-    return (Some(Score::no_info()), None);
+    return (Some(Score::NO_INFO), None);
   }
 
   if let Some(cached_score) = table.get(game) {
@@ -78,7 +78,7 @@ where
 
     match best_score.clone() {
       Some(best_score_val) => {
-        if score.better(&best_score_val) {
+        if score.better(best_score_val) {
           best_score = Some(score.clone());
           best_move = Some(m);
         }

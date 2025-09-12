@@ -47,7 +47,7 @@ where
   pub fn update(&self, state: G, score: Score) {
     match self.table.entry(state) {
       Entry::Occupied(mut entry) => {
-        entry.insert(entry.get().merge(&score));
+        entry.insert(entry.get().merge(score));
       }
       Entry::Vacant(entry) => {
         entry.insert(score);
