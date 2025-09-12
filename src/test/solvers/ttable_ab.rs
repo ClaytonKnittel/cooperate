@@ -1,31 +1,58 @@
-use std::marker::PhantomData;
+use std::{
+  collections::{hash_map::Entry, HashMap},
+  hash::Hash,
+};
 
 use abstract_game::{Game, GameResult, Score, Solver};
 
-pub struct AlphaBeta<G>(PhantomData<G>);
+pub struct TTAlphaBeta<G> {
+  table: HashMap<G, Score>,
+}
 
-impl<G: Game> AlphaBeta<G> {
+impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
   pub fn new() -> Self {
-    Self(PhantomData)
-  }
-
-  fn score_for_game(game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
-    match game.finished() {
-      GameResult::Win(player) => {
-        if player == game.current_player() {
-          Score::lose(1)
-        } else {
-          Score::win(1)
-        }
-      }
-      GameResult::Tie => Score::guaranteed_tie(),
-      GameResult::NotFinished => {
-        Self::solve_impl(game, depth - 1, beta.forwardstep(), alpha.forwardstep()).backstep()
-      }
+    Self {
+      table: HashMap::new(),
     }
   }
 
-  fn solve_impl(game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn score_for_game(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+    match game.finished() {
+      GameResult::Win(player) => {
+        return if player == game.current_player() {
+          Score::lose(1)
+        } else {
+          Score::win(1)
+        };
+      }
+      GameResult::Tie => return Score::guaranteed_tie(),
+      GameResult::NotFinished => {}
+    }
+
+    if let Some(&score) = self.table.get(game) {
+      if score.determined(depth) {
+        return score;
+      }
+    }
+
+    let score = self
+      .solve_impl(game, depth - 1, beta.forwardstep(), alpha.forwardstep())
+      .backstep();
+    debug_assert!(score.determined(depth));
+
+    match self.table.entry(game.clone()) {
+      Entry::Occupied(mut entry) => {
+        *entry.get_mut() = entry.get().merge(score);
+      }
+      Entry::Vacant(entry) => {
+        entry.insert(score);
+      }
+    }
+
+    score
+  }
+
+  fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     debug_assert!(alpha <= beta);
     if depth == 0 {
@@ -34,7 +61,7 @@ impl<G: Game> AlphaBeta<G> {
 
     let mut best_score = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
-      let score = Self::score_for_game(&next_game, depth, alpha.max(best_score), beta);
+      let score = self.score_for_game(&next_game, depth, alpha.max(best_score), beta);
       best_score = best_score.max(score);
       if score > beta {
         break;
@@ -45,7 +72,7 @@ impl<G: Game> AlphaBeta<G> {
   }
 }
 
-impl<G: Game> Solver for AlphaBeta<G> {
+impl<G: Game + Hash + Eq> Solver for TTAlphaBeta<G> {
   type Game = G;
 
   fn best_move(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
@@ -60,7 +87,7 @@ impl<G: Game> Solver for AlphaBeta<G> {
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = Self::score_for_game(&next_game, depth, alpha, Score::win(1));
+        let score = self.score_for_game(&next_game, depth, alpha, Score::win(1));
         alpha = alpha.max(score);
         (score, Some(m))
       })
@@ -76,7 +103,7 @@ mod tests {
 
   use googletest::{gtest, prelude::*};
 
-  use crate::test::solvers::alpha_beta::AlphaBeta;
+  use crate::test::solvers::ttable_ab::TTAlphaBeta;
 
   #[gtest]
   fn test_solve_nim() {
@@ -84,7 +111,7 @@ mod tests {
       let depth = sticks + 1;
       let expected_winner = sticks % 3 != 0;
 
-      let mut solver = AlphaBeta::new();
+      let mut solver = TTAlphaBeta::new();
       let (score, best_move) = solver.best_move(&Nim::new(sticks), sticks + 1);
 
       expect_eq!(

@@ -7,15 +7,18 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver};
+use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_ab::TTAlphaBeta};
 
 #[template]
 #[rstest]
-fn solvers(#[values(SimpleSolver, AlphaBeta)] solver: (impl Solver)) {}
+fn solvers(
+  #[values(SimpleSolver::new(), AlphaBeta::new(), TTAlphaBeta::new())] solver: (impl Solver),
+) {
+}
 
 #[apply(solvers)]
 #[gtest]
-fn test_solve(mut solver: impl Solver) {
+fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   let mut ttt = TicTacToe::new();
   {
     let (score, m) = solver.best_move(&ttt, 9);

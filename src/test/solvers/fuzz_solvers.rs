@@ -8,12 +8,13 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver};
+use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_ab::TTAlphaBeta};
 
 #[template]
 #[rstest]
 fn solvers(
-  #[values((SimpleSolver, AlphaBeta))] solvers: (impl Solver, impl Solver),
+  #[values((SimpleSolver::new(), AlphaBeta::new()), (SimpleSolver::new(), TTAlphaBeta::new()))]
+  solvers: (impl Solver, impl Solver),
   #[values((Nim::new(20), 13), (TicTacToe::new(), 8), (ConnectN::new(4, 3, 3), 11))]
     starting_state: (impl Game<Move: Ord>, u32),
 ) {
@@ -21,7 +22,10 @@ fn solvers(
 
 #[apply(solvers)]
 #[gtest]
-fn test_solve(solvers: (impl Solver, impl Solver), starting_state: (impl Game<Move: Ord>, u32)) {
+fn test_solve<G: Game<Move: Ord>>(
+  solvers: (impl Solver<Game = G>, impl Solver<Game = G>),
+  starting_state: (G, u32),
+) {
   let (mut solver1, mut solver2) = solvers;
   let (starting_state, expected_num_moves) = starting_state;
 

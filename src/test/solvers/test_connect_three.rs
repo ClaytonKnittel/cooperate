@@ -7,15 +7,18 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver};
+use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_ab::TTAlphaBeta};
 
 #[template]
 #[rstest]
-fn solvers(#[values(SimpleSolver, AlphaBeta)] solver: (impl Solver)) {}
+fn solvers(
+  #[values(SimpleSolver::new(), AlphaBeta::new(), TTAlphaBeta::new())] solver: (impl Solver),
+) {
+}
 
 #[apply(solvers)]
 #[gtest]
-fn test_solve(mut solver: impl Solver) {
+fn test_solve(mut solver: impl Solver<Game = ConnectN>) {
   let conn = ConnectN::new(4, 3, 3);
 
   let (score, m) = solver.best_move(&conn, 12);
@@ -28,7 +31,7 @@ fn test_solve(mut solver: impl Solver) {
 
 #[apply(solvers)]
 #[gtest]
-fn test_lose_in_corner(mut solver: impl Solver) {
+fn test_lose_in_corner(mut solver: impl Solver<Game = ConnectN>) {
   let mut conn = ConnectN::new(4, 3, 3);
   conn.make_move(ConnectMove { col: 0 });
 

@@ -1,9 +1,15 @@
+use std::marker::PhantomData;
+
 use abstract_game::{Game, GameResult, Score, Solver};
 
-pub struct SimpleSolver;
+pub struct SimpleSolver<G>(PhantomData<G>);
 
-impl SimpleSolver {
-  fn score_for_game<G: Game>(game: &G, depth: u32) -> Score {
+impl<G: Game> SimpleSolver<G> {
+  pub fn new() -> Self {
+    Self(PhantomData)
+  }
+
+  fn score_for_game(game: &G, depth: u32) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
         if player == game.current_player() {
@@ -17,7 +23,7 @@ impl SimpleSolver {
     }
   }
 
-  fn solve_impl<G: Game>(game: &G, depth: u32) -> Score {
+  fn solve_impl(game: &G, depth: u32) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     if depth == 0 {
       return Score::NO_INFO;
@@ -33,8 +39,10 @@ impl SimpleSolver {
   }
 }
 
-impl Solver for SimpleSolver {
-  fn best_move<G: Game>(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
+impl<G: Game> Solver for SimpleSolver<G> {
+  type Game = G;
+
+  fn best_move(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     if depth == 0 {
       return (Score::NO_INFO, None);
@@ -67,7 +75,7 @@ mod tests {
       let depth = sticks + 1;
       let expected_winner = sticks % 3 != 0;
 
-      let mut solver = SimpleSolver;
+      let mut solver = SimpleSolver::new();
       let (score, best_move) = solver.best_move(&Nim::new(sticks), sticks + 1);
 
       expect_eq!(
