@@ -167,7 +167,7 @@ mod tests {
   use abstract_game::{Game, GameResult};
 
   use crate::{
-    cooperate::construct_globals,
+    cooperate::{construct_globals, Options},
     search_worker::{start_worker, WorkerData},
     test::{
       gomoku::Gomoku,
@@ -183,7 +183,7 @@ mod tests {
 
     let globals = construct_globals(
       &Nim::new(STICKS),
-      crate::Options {
+      Options {
         search_depth: STICKS + 1,
         num_threads: 1,
         unit_depth: 0,
@@ -206,7 +206,7 @@ mod tests {
 
     let globals = construct_globals(
       &Nim::new(STICKS),
-      crate::Options {
+      Options {
         search_depth: STICKS + 1,
         num_threads: 2,
         unit_depth: 1,
@@ -241,7 +241,7 @@ mod tests {
 
     let globals = construct_globals(
       &Ttt::new(),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 1,
@@ -294,7 +294,7 @@ mod tests {
 
     let globals = construct_globals(
       &Ttt::new(),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 2,
@@ -348,7 +348,7 @@ mod tests {
 
     let globals = construct_globals(
       &Gomoku::new(4, 4, 4),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 3,
@@ -412,7 +412,7 @@ mod tests {
 
     let globals = construct_globals(
       &Gomoku::new(4, 4, 4),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 3,
@@ -476,7 +476,7 @@ mod tests {
 
     let globals = construct_globals(
       &Gomoku::new(4, 4, 4),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 5,
@@ -540,7 +540,7 @@ mod tests {
 
     let globals = construct_globals(
       &Gomoku::new(5, 5, 4),
-      crate::Options {
+      Options {
         search_depth: DEPTH,
         num_threads: THREADS,
         unit_depth: 5,

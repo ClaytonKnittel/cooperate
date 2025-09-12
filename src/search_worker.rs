@@ -8,8 +8,8 @@ use abstract_game::{Game, GameResult, Score};
 
 use crate::{
   global_data::{GlobalData, LookupResult},
+  metrics::Metrics,
   stack::{Stack, StackType},
-  Metrics,
 };
 
 pub struct WorkerData<G, H>

@@ -8,7 +8,7 @@ use abstract_game::{Game, GameResult, Score};
 use crossbeam_queue::SegQueue;
 use dashmap::{mapref::entry::Entry, DashMap};
 
-use crate::{null_lock::NullLock, stack::Stack, table::Table, Metrics};
+use crate::{metrics::Metrics, null_lock::NullLock, stack::Stack, table::Table};
 
 struct PendingFrame<G>
 where

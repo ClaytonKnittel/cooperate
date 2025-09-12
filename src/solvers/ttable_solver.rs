@@ -1,18 +1,26 @@
 use std::{
   collections::{hash_map::Entry, HashMap},
-  hash::Hash,
+  hash::{BuildHasher, Hash, RandomState},
 };
 
 use abstract_game::{Game, GameResult, Score, Solver};
 
-pub struct TTSolver<G> {
-  table: HashMap<G, Score>,
+pub struct TTSolver<G, S> {
+  table: HashMap<G, Score, S>,
 }
 
-impl<G: Game + Hash + Eq> TTSolver<G> {
+impl<G: Game + Hash + Eq> TTSolver<G, RandomState> {
   pub fn new() -> Self {
     Self {
       table: HashMap::new(),
+    }
+  }
+}
+
+impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
+  pub fn with_hasher(hasher: S) -> Self {
+    Self {
+      table: HashMap::with_hasher(hasher),
     }
   }
 
@@ -65,7 +73,7 @@ impl<G: Game + Hash + Eq> TTSolver<G> {
   }
 }
 
-impl<G: Game + Hash + Eq> Solver for TTSolver<G> {
+impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
   type Game = G;
 
   fn best_move(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
