@@ -5,11 +5,11 @@ use std::{
 
 use abstract_game::{Game, GameResult, Score, Solver};
 
-pub struct TTSolver<G, S> {
+pub struct TTAlphaBeta<G, S> {
   table: HashMap<G, Score, S>,
 }
 
-impl<G: Game + Hash + Eq> TTSolver<G, RandomState> {
+impl<G> TTAlphaBeta<G, RandomState> {
   pub fn new() -> Self {
     Self {
       table: HashMap::new(),
@@ -17,7 +17,7 @@ impl<G: Game + Hash + Eq> TTSolver<G, RandomState> {
   }
 }
 
-impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
+impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
   pub fn with_hasher(hasher: S) -> Self {
     Self {
       table: HashMap::with_hasher(hasher),
@@ -28,7 +28,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
     &self.table
   }
 
-  fn score_for_game(&mut self, game: &G, depth: u32) -> Score {
+  fn score_for_game(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
         if player == game.current_player() {
@@ -47,7 +47,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
       }
     }
 
-    let score = self.solve_impl(game, depth);
+    let score = self.solve_impl(game, depth, beta.forwardstep(), alpha.forwardstep());
 
     match self.table.entry(game.clone()) {
       Entry::Occupied(mut entry) => {
@@ -63,22 +63,27 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
     .backstep()
   }
 
-  fn solve_impl(&mut self, game: &G, depth: u32) -> Score {
+  fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
+    debug_assert!(alpha <= beta, "{alpha} vs {beta}");
     if depth == 0 {
       return Score::NO_INFO;
     }
 
-    game
-      .each_move()
-      .map(|m| game.with_move(m))
-      .map(|next_game| self.score_for_game(&next_game, depth - 1))
-      .max()
-      .unwrap_or(Score::lose(1))
+    let mut best_score = Score::lose(1);
+    for next_game in game.each_move().map(|m| game.with_move(m)) {
+      let score = self.score_for_game(&next_game, depth - 1, alpha.max(best_score), beta);
+      best_score = best_score.max(score);
+      if score > beta {
+        return best_score.break_early();
+      }
+    }
+
+    best_score
   }
 }
 
-impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
+impl<G: Game + Hash + Eq, S: BuildHasher + Clone> Solver for TTAlphaBeta<G, S> {
   type Game = G;
 
   fn best_move(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
@@ -93,7 +98,7 @@ impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = self.score_for_game(&next_game, depth - 1);
+        let score = self.score_for_game(&next_game, depth - 1, alpha, Score::win(1));
         alpha = alpha.max(score);
         (score, Some(m))
       })
@@ -105,14 +110,11 @@ impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
 
 #[cfg(test)]
 mod tests {
-  use abstract_game::{
-    test_games::{Nim, TicTacToe},
-    ScoreValue, Solver,
-  };
+  use abstract_game::{test_games::Nim, ScoreValue, Solver};
 
   use googletest::{gtest, prelude::*};
 
-  use crate::solvers::ttable_solver::TTSolver;
+  use super::TTAlphaBeta;
 
   #[gtest]
   fn test_solve_nim() {
@@ -120,7 +122,7 @@ mod tests {
       let depth = sticks + 1;
       let expected_winner = sticks % 3 != 0;
 
-      let mut solver = TTSolver::new();
+      let mut solver = TTAlphaBeta::new();
       let (score, best_move) = solver.best_move(&Nim::new(sticks), sticks + 1);
 
       expect_eq!(
@@ -137,19 +139,6 @@ mod tests {
       } else {
         expect_that!(best_move, some(anything()));
       }
-    }
-  }
-
-  /// Tests that the TT solver fully determines every game state that it
-  /// visits.
-  #[gtest]
-  fn test_fully_determined() {
-    let mut solver = TTSolver::new();
-    // populate the table
-    solver.best_move(&TicTacToe::new(), 9);
-
-    for (game, score) in solver.table {
-      assert!(score.fully_determined(), "{score}:\n{game:?}");
     }
   }
 }
