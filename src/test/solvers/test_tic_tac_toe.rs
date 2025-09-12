@@ -22,7 +22,7 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   let mut ttt = TicTacToe::new();
   {
     let (score, m) = solver.best_move(&ttt, 9);
-    expect_eq!(score.score_at_depth(9), ScoreValue::Tie);
+    expect_eq!(score.score_at_depth(9), ScoreValue::Tie, "{score}");
     expect_that!(m, some(anything()));
   }
 
@@ -32,7 +32,7 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((0, 0)));
   {
     let (score, m) = solver.best_move(&ttt, 8);
-    expect_eq!(score.score_at_depth(8), ScoreValue::Tie);
+    expect_eq!(score.score_at_depth(8), ScoreValue::Tie, "{score}");
     expect_that!(
       m,
       some(any![
@@ -49,7 +49,11 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((2, 0)));
   {
     let (score, m) = solver.best_move(&ttt, 7);
-    expect_eq!(score.score_at_depth(7), ScoreValue::CurrentPlayerWins);
+    expect_eq!(
+      score.score_at_depth(7),
+      ScoreValue::CurrentPlayerWins,
+      "{score}"
+    );
     expect_that!(m, some(eq(TTTMove::new((2, 2)))));
   }
 
@@ -59,7 +63,11 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((2, 2)));
   {
     let (score, m) = solver.best_move(&ttt, 6);
-    expect_eq!(score.score_at_depth(6), ScoreValue::OtherPlayerWins);
+    expect_eq!(
+      score.score_at_depth(6),
+      ScoreValue::OtherPlayerWins,
+      "{score}"
+    );
     expect_that!(m, some(eq(TTTMove::new((1, 1)))));
   }
 
@@ -69,7 +77,11 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((1, 1)));
   {
     let (score, m) = solver.best_move(&ttt, 5);
-    expect_eq!(score.score_at_depth(5), ScoreValue::CurrentPlayerWins);
+    expect_eq!(
+      score.score_at_depth(5),
+      ScoreValue::CurrentPlayerWins,
+      "{score}"
+    );
     expect_that!(m, some(eq(TTTMove::new((0, 2)))));
   }
 
@@ -79,7 +91,11 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((0, 2)));
   {
     let (score, m) = solver.best_move(&ttt, 5);
-    expect_eq!(score.score_at_depth(5), ScoreValue::OtherPlayerWins);
+    expect_eq!(
+      score.score_at_depth(5),
+      ScoreValue::OtherPlayerWins,
+      "{score}"
+    );
     expect_that!(m, some(anything()));
   }
 
@@ -89,7 +105,11 @@ fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((0, 1)));
   {
     let (score, m) = solver.best_move(&ttt, 4);
-    expect_eq!(score.score_at_depth(4), ScoreValue::CurrentPlayerWins);
+    expect_eq!(
+      score.score_at_depth(4),
+      ScoreValue::CurrentPlayerWins,
+      "{score}"
+    );
     expect_that!(m, some(eq(TTTMove::new((1, 2)))));
   }
 }
