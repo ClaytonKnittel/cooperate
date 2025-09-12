@@ -7,6 +7,7 @@ mod stack;
 mod table;
 mod transparent_iterator;
 
+pub mod solvers;
 #[cfg(test)]
 mod test;
 

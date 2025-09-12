@@ -99,7 +99,7 @@ mod tests {
 
   use googletest::{gtest, prelude::*};
 
-  use crate::test::solvers::ttable_solver::TTSolver;
+  use crate::solvers::ttable_solver::TTSolver;
 
   #[gtest]
   fn test_solve_nim() {

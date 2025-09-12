@@ -78,7 +78,7 @@ mod tests {
 
   use googletest::{gtest, prelude::*};
 
-  use crate::test::solvers::alpha_beta::AlphaBeta;
+  use crate::solvers::alpha_beta::AlphaBeta;
 
   #[gtest]
   fn test_solve_nim() {
