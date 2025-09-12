@@ -19,11 +19,11 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
   fn score_for_game(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
-        return if player == game.current_player() {
-          Score::lose(1)
+        if player == game.current_player() {
+          return Score::lose(1);
         } else {
-          Score::win(1)
-        };
+          return Score::win(1);
+        }
       }
       GameResult::Tie => return Score::guaranteed_tie(),
       GameResult::NotFinished => {}
@@ -42,14 +42,15 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
 
     match self.table.entry(game.clone()) {
       Entry::Occupied(mut entry) => {
-        *entry.get_mut() = entry.get().merge(score);
+        let merged = entry.get().merge(score);
+        *entry.get_mut() = merged;
+        merged
       }
       Entry::Vacant(entry) => {
         entry.insert(score);
+        score
       }
     }
-
-    score
   }
 
   fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {

@@ -37,6 +37,8 @@ impl<G: Game> AlphaBeta<G> {
       let score = Self::score_for_game(&next_game, depth, alpha.max(best_score), beta);
       best_score = best_score.max(score);
       if score > beta {
+        // TODO: This is necessary for correctness, need a test that fails without this.
+        // best_score = best_score.break_early();
         break;
       }
     }
