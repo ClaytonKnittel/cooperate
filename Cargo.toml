@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-abstract_game = { git = "https://github.com/ClaytonKnittel/abstract-game.git", rev = "8f6c581a6a6071b2af57bbc7e24bfcca42a2ace7" }
+abstract_game = { git = "https://github.com/ClaytonKnittel/abstract-game.git", rev = "62b7ba95f796bed92fb9a52786b786c812aac8e6" }
 crossbeam-queue = "0.3"
 dashmap = "5.5"
 itertools = "0.14.0"
