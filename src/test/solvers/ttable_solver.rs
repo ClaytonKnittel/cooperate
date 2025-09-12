@@ -5,11 +5,11 @@ use std::{
 
 use abstract_game::{Game, GameResult, Score, Solver};
 
-pub struct TTAlphaBeta<G> {
+pub struct TTSolver<G> {
   table: HashMap<G, Score>,
 }
 
-impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
+impl<G: Game + Hash + Eq> TTSolver<G> {
   pub fn new() -> Self {
     Self {
       table: HashMap::new(),
@@ -65,7 +65,7 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
   }
 }
 
-impl<G: Game + Hash + Eq> Solver for TTAlphaBeta<G> {
+impl<G: Game + Hash + Eq> Solver for TTSolver<G> {
   type Game = G;
 
   fn best_move(&mut self, game: &G, depth: u32) -> (Score, Option<G::Move>) {
@@ -92,11 +92,14 @@ impl<G: Game + Hash + Eq> Solver for TTAlphaBeta<G> {
 
 #[cfg(test)]
 mod tests {
-  use abstract_game::{test_games::Nim, ScoreValue, Solver};
+  use abstract_game::{
+    test_games::{Nim, TicTacToe},
+    ScoreValue, Solver,
+  };
 
   use googletest::{gtest, prelude::*};
 
-  use crate::test::solvers::ttable_solver::TTAlphaBeta;
+  use crate::test::solvers::ttable_solver::TTSolver;
 
   #[gtest]
   fn test_solve_nim() {
@@ -104,7 +107,7 @@ mod tests {
       let depth = sticks + 1;
       let expected_winner = sticks % 3 != 0;
 
-      let mut solver = TTAlphaBeta::new();
+      let mut solver = TTSolver::new();
       let (score, best_move) = solver.best_move(&Nim::new(sticks), sticks + 1);
 
       expect_eq!(
@@ -121,6 +124,19 @@ mod tests {
       } else {
         expect_that!(best_move, some(anything()));
       }
+    }
+  }
+
+  /// Tests that the TT solver fully determines every game state that it
+  /// visits.
+  #[gtest]
+  fn test_fully_determined() {
+    let mut solver = TTSolver::new();
+    // populate the table
+    solver.best_move(&TicTacToe::new(), 9);
+
+    for (game, score) in solver.table {
+      assert!(score.fully_determined(), "{score}:\n{game:?}");
     }
   }
 }

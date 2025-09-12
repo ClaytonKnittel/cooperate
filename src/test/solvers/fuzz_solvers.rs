@@ -8,14 +8,12 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{
-  alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTAlphaBeta,
-};
+use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTSolver};
 
 #[template]
 #[rstest]
 fn solvers(
-  #[values((SimpleSolver::new(), AlphaBeta::new()), (SimpleSolver::new(), TTAlphaBeta::new()))]
+  #[values((SimpleSolver::new(), AlphaBeta::new()), (SimpleSolver::new(), TTSolver::new()))]
   solvers: (impl Solver, impl Solver),
   #[values((Nim::new(20), 13), (TicTacToe::new(), 8), (ConnectN::new(4, 3, 3), 11))]
     starting_state: (impl Game<Move: Ord>, u32),
