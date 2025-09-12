@@ -28,7 +28,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
     &self.table
   }
 
-  fn score_for_game(&mut self, game: &G, depth: u32) -> Score {
+  fn backstepped_score_for_game(&mut self, game: &G, depth: u32) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
         if player == game.current_player() {
@@ -72,7 +72,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
     game
       .each_move()
       .map(|m| game.with_move(m))
-      .map(|next_game| self.score_for_game(&next_game, depth - 1))
+      .map(|next_game| self.backstepped_score_for_game(&next_game, depth - 1))
       .max()
       .unwrap_or(Score::lose(1))
   }
@@ -87,15 +87,13 @@ impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
       return (Score::NO_INFO, None);
     }
 
-    let mut alpha = Score::lose(1);
-
     game
       .each_move()
       .map(|m| {
-        let next_game = game.with_move(m);
-        let score = self.score_for_game(&next_game, depth - 1);
-        alpha = alpha.max(score);
-        (score, Some(m))
+        (
+          self.backstepped_score_for_game(&game.with_move(m), depth - 1),
+          Some(m),
+        )
       })
       .max_by_key(|(score, _)| score.clone())
       // If you can't make a move, you lose.

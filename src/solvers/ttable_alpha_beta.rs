@@ -43,7 +43,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
 
     if let Some(&score) = self.table.get(game) {
       if score.determined(depth) {
-        return score.backstep();
+        return score;
       }
     }
 
@@ -60,7 +60,6 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
         score
       }
     }
-    .backstep()
   }
 
   fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
@@ -72,9 +71,11 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
 
     let mut best_score = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
-      let score = self.score_for_game(&next_game, depth - 1, alpha.max(best_score), beta);
+      let score = self
+        .score_for_game(&next_game, depth - 1, alpha.max(best_score), beta)
+        .backstep();
       best_score = best_score.max(score);
-      if score > beta {
+      if (score.determined(depth) && score.score_at_depth(depth).is_winning()) || score > beta {
         return best_score.break_early();
       }
     }
@@ -98,7 +99,9 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> Solver for TTAlphaBeta<G, S> {
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = self.score_for_game(&next_game, depth - 1, alpha, Score::win(1));
+        let score = self
+          .score_for_game(&next_game, depth - 1, alpha, Score::win(1))
+          .backstep();
         alpha = alpha.max(score);
         (score, Some(m))
       })
