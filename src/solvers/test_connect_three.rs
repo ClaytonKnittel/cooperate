@@ -7,7 +7,7 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTSolver};
+use crate::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTSolver};
 
 #[template]
 #[rstest]
