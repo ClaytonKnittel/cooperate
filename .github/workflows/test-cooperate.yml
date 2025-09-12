@@ -20,4 +20,4 @@ jobs:
       - name: Build
         run: cargo build --verbose
       - name: Test cooperate
-        run: cargo test
+        run: cargo test --profile test
