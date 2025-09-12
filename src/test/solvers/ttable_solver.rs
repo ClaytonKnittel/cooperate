@@ -16,7 +16,7 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
     }
   }
 
-  fn score_for_game(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn score_for_game(&mut self, game: &G, depth: u32) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
         if player == game.current_player() {
@@ -35,10 +35,7 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
       }
     }
 
-    let score = self
-      .solve_impl(game, depth - 1, beta.forwardstep(), alpha.forwardstep())
-      .backstep();
-    debug_assert!(score.determined(depth));
+    let score = self.solve_impl(game, depth - 1).backstep();
 
     match self.table.entry(game.clone()) {
       Entry::Occupied(mut entry) => {
@@ -53,23 +50,18 @@ impl<G: Game + Hash + Eq> TTAlphaBeta<G> {
     }
   }
 
-  fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn solve_impl(&mut self, game: &G, depth: u32) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
-    debug_assert!(alpha <= beta);
     if depth == 0 {
       return Score::NO_INFO;
     }
 
-    let mut best_score = Score::lose(1);
-    for next_game in game.each_move().map(|m| game.with_move(m)) {
-      let score = self.score_for_game(&next_game, depth, alpha.max(best_score), beta);
-      best_score = best_score.max(score);
-      if score > beta {
-        break;
-      }
-    }
-
-    best_score
+    game
+      .each_move()
+      .map(|m| game.with_move(m))
+      .map(|next_game| self.score_for_game(&next_game, depth))
+      .max()
+      .unwrap_or(Score::lose(1))
   }
 }
 
@@ -88,7 +80,7 @@ impl<G: Game + Hash + Eq> Solver for TTAlphaBeta<G> {
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = self.score_for_game(&next_game, depth, alpha, Score::win(1));
+        let score = self.score_for_game(&next_game, depth);
         alpha = alpha.max(score);
         (score, Some(m))
       })
@@ -104,7 +96,7 @@ mod tests {
 
   use googletest::{gtest, prelude::*};
 
-  use crate::test::solvers::ttable_ab::TTAlphaBeta;
+  use crate::test::solvers::ttable_solver::TTAlphaBeta;
 
   #[gtest]
   fn test_solve_nim() {

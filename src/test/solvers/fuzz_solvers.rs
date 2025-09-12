@@ -8,7 +8,9 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::test::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_ab::TTAlphaBeta};
+use crate::test::solvers::{
+  alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTAlphaBeta,
+};
 
 #[template]
 #[rstest]
