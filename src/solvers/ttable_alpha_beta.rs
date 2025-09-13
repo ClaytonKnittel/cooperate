@@ -53,7 +53,11 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
       }
     }
 
-    let score = self.solve_impl(game, depth, beta.forwardstep(), alpha.forwardstep());
+    let new_beta = alpha.forwardstep();
+    let score = self.solve_impl(game, depth, beta.forwardstep(), new_beta);
+    if (!score.determined(depth) || !score.score_at_depth(depth).is_winning()) && score > new_beta {
+      return score;
+    }
 
     match self.table.entry(game.clone()) {
       Entry::Occupied(mut entry) => {

@@ -11,7 +11,9 @@ use googletest::gtest;
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::solvers::{ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver};
+use crate::solvers::{
+  simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
+};
 
 trait HasTable<G, S> {
   fn table(&self) -> &HashMap<G, Score, S>;
@@ -26,6 +28,30 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> HasTable<G, S> for TTSolver<G,
 impl<G: Game + Hash + Eq, S: BuildHasher + Clone> HasTable<G, S> for TTAlphaBeta<G, S> {
   fn table(&self) -> &HashMap<G, Score, S> {
     TTAlphaBeta::table(self)
+  }
+}
+
+#[template]
+#[rstest]
+fn games(
+  #[values((Nim::new(20), 20), (TicTacToe::new(), 9), (ConnectN::new(4, 3, 3), 12))]
+    starting_state: (impl Game<Move: Ord>, u32),
+) {
+}
+
+#[apply(games)]
+#[gtest]
+fn test_ground_truth_table_solver<G: Game<Move: Ord> + Hash + Eq>(starting_state: (G, u32)) {
+  let (starting_state, depth) = starting_state;
+
+  let mut solver = TTSolver::new();
+
+  solver.best_move(&starting_state, depth);
+
+  for (game, &score) in solver.table() {
+    let (expected_score, _) = SimpleSolver::new().best_move(game, depth);
+    println!("{score} vs {expected_score}:\n{game:?}\n");
+    assert_eq!(score, expected_score);
   }
 }
 
