@@ -71,8 +71,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTSolver<G, S> {
 
     game
       .each_move()
-      .map(|m| game.with_move(m))
-      .map(|next_game| self.backstepped_score_for_game(&next_game, depth - 1))
+      .map(|m| self.backstepped_score_for_game(&game.with_move(m), depth - 1))
       .reduce(|acc, score| acc.accumulate(score))
       .unwrap_or(Score::lose(1))
   }
