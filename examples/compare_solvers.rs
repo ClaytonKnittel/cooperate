@@ -6,8 +6,8 @@ use std::{
 
 use abstract_game::{test_games::ConnectN, Game, Solver};
 use cooperate::solvers::{
-  alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
-  ttable_solver::TTSolver,
+  alpha_beta::AlphaBeta, iter_deep::IterativeDeepening, simple::SimpleSolver,
+  ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
 };
 
 fn time_solver<G: Game>(
@@ -38,6 +38,10 @@ fn time_solvers<G: Game + Hash + Eq>(initial_state: &G, depth: u32) {
   println!(
     "TT+AB time: {:?}",
     time_solver(TTAlphaBeta::new(), initial_state, depth)
+  );
+  println!(
+    "Iter deep time: {:?}",
+    time_solver(IterativeDeepening::new(), initial_state, depth)
   );
 }
 
