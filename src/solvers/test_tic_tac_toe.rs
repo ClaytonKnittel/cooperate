@@ -7,25 +7,19 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::solvers::{
-  alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
-  ttable_solver::TTSolver,
-};
+use crate::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTSolver};
 
+/// Only includes solvers which find the true optimal moves (e.g.
+/// highest-valued `Score`), which differs from optimal in terms of "never
+/// loses" in that the minimum path to victory is required.
 #[template]
 #[rstest]
-fn solvers(
-  #[values(
-    SimpleSolver::new(),
-    AlphaBeta::new(),
-    TTSolver::new(),
-    TTAlphaBeta::new()
-  )]
-  solver: (impl Solver),
+fn complete_solvers(
+  #[values(SimpleSolver::new(), AlphaBeta::new(), TTSolver::new())] solver: (impl Solver),
 ) {
 }
 
-#[apply(solvers)]
+#[apply(complete_solvers)]
 #[gtest]
 fn test_solve(mut solver: impl Solver<Game = TicTacToe>) {
   let mut ttt = TicTacToe::new();

@@ -53,8 +53,13 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
       }
     }
 
+    let new_alpha = beta.forwardstep();
     let new_beta = alpha.forwardstep();
-    let score = self.solve_impl(game, depth, beta.forwardstep(), new_beta);
+    if new_alpha > new_beta {
+      return Score::lose(1);
+    }
+
+    let score = self.solve_impl(game, depth, new_alpha, new_beta);
     if (!score.determined(depth) || !score.score_at_depth(depth).is_winning()) && score > new_beta {
       return score;
     }
