@@ -78,17 +78,17 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
       return Score::NO_INFO;
     }
 
-    let mut best_score = Score::lose(1);
+    let mut acc = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
       let score =
-        self.backstepped_score_for_game(&next_game, depth - 1, alpha.max(best_score.score()), beta);
-      best_score = best_score.max(score);
+        self.backstepped_score_for_game(&next_game, depth - 1, alpha.max(acc.score()), beta);
+      acc = acc.accumulate(score);
       if score.score() >= beta {
-        return best_score.break_early();
+        return acc.break_early();
       }
     }
 
-    best_score
+    acc
   }
 }
 
