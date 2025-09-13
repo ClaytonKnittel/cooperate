@@ -12,7 +12,8 @@ use rstest::rstest;
 use rstest_reuse::{apply, template};
 
 use crate::solvers::{
-  simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
+  iter_deep::IterativeDeepening, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
+  ttable_solver::TTSolver,
 };
 
 trait HasTable<G, S> {
@@ -28,6 +29,12 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> HasTable<G, S> for TTSolver<G,
 impl<G: Game + Hash + Eq, S: BuildHasher + Clone> HasTable<G, S> for TTAlphaBeta<G, S> {
   fn table(&self) -> &HashMap<G, Score, S> {
     TTAlphaBeta::table(self)
+  }
+}
+
+impl<G: Game + Hash + Eq, S: BuildHasher + Clone> HasTable<G, S> for IterativeDeepening<G, S> {
+  fn table(&self) -> &HashMap<G, Score, S> {
+    IterativeDeepening::table(self)
   }
 }
 
@@ -58,10 +65,11 @@ fn test_ground_truth_table_solver<G: Game<Move: Ord> + Hash + Eq>(starting_state
 #[template]
 #[rstest]
 fn solvers(
-  #[values((TTSolver::new(), TTAlphaBeta::new()))] solvers: (
-    impl Solver + HasTable,
-    impl Solver + HasTable,
-  ),
+  #[values(
+    (TTSolver::new(), TTAlphaBeta::new()),
+    (TTSolver::new(), IterativeDeepening::new(),
+  ))]
+  solvers: (impl Solver + HasTable, impl Solver + HasTable),
   #[values(
     (Nim::new(20), 20),
     (TicTacToe::new(), 9),
@@ -89,6 +97,9 @@ fn test_solve<G: Game<Move: Ord> + Hash + Eq, S: BuildHasher + Clone>(
 
   for (game, score) in solver2.table() {
     let expected_score = *solver1.table().get(game).unwrap();
+    if *score != expected_score {
+      println!("{score} vs {expected_score}:\n{game:?}\n");
+    }
     assert!(
       score.compatible(expected_score),
       "{score} vs {expected_score} for state\n{game:?}"

@@ -1,4 +1,5 @@
 pub mod alpha_beta;
+pub mod iter_deep;
 pub mod simple;
 pub mod ttable_alpha_beta;
 pub mod ttable_solver;

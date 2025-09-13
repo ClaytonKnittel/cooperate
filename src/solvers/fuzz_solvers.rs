@@ -9,8 +9,8 @@ use rstest::rstest;
 use rstest_reuse::{apply, template};
 
 use crate::solvers::{
-  alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
-  ttable_solver::TTSolver,
+  alpha_beta::AlphaBeta, iter_deep::IterativeDeepening, simple::SimpleSolver,
+  ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
 };
 
 #[template]
@@ -19,7 +19,8 @@ fn solvers(
   #[values(
     (SimpleSolver::new(), AlphaBeta::new()),
     (SimpleSolver::new(), TTSolver::new()),
-    (SimpleSolver::new(), TTAlphaBeta::new())
+    (SimpleSolver::new(), TTAlphaBeta::new()),
+    (SimpleSolver::new(), IterativeDeepening::new()),
   )]
   solvers: (impl Solver, impl Solver),
   #[values((Nim::new(20), 13), (TicTacToe::new(), 8), (ConnectN::new(4, 3, 3), 11))]
