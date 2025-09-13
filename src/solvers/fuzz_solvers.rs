@@ -8,9 +8,12 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::solvers::{
-  alpha_beta::AlphaBeta, iter_deep::IterativeDeepening, simple::SimpleSolver,
-  ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
+use crate::{
+  solvers::{
+    alpha_beta::AlphaBeta, iter_deep::IterativeDeepening, simple::SimpleSolver,
+    ttable_alpha_beta::TTAlphaBeta, ttable_solver::TTSolver,
+  },
+  test::gomoku::Gomoku,
 };
 
 #[template]
@@ -23,7 +26,12 @@ fn solvers(
     (SimpleSolver::new(), IterativeDeepening::new()),
   )]
   solvers: (impl Solver, impl Solver),
-  #[values((Nim::new(20), 13), (TicTacToe::new(), 8), (ConnectN::new(4, 3, 3), 11))]
+  #[values(
+    (Nim::new(20), 0, 13),
+    (TicTacToe::new(), 0, 8),
+    (ConnectN::new(4, 3, 3), 0, 11),
+    (Gomoku::new(4, 3, 3), 6, 6),
+  )]
   starting_state: (impl Game<Move: Ord>, u32),
 ) {
 }
@@ -32,18 +40,18 @@ fn solvers(
 #[gtest]
 fn test_solve<G: Game<Move: Ord>>(
   solvers: (impl Solver<Game = G>, impl Solver<Game = G>),
-  starting_state: (G, u32),
+  starting_state: (G, u32, u32),
 ) {
   let (mut solver1, mut solver2) = solvers;
-  let (starting_state, expected_num_moves) = starting_state;
+  let (starting_state, min_initial_moves, expected_num_moves) = starting_state;
 
   let mut rng = StdRng::seed_from_u64(0x190214888295);
 
   const NUM_TRIALS: u32 = 500;
   for trial in 0..NUM_TRIALS {
     let n_moves = rng
-      .random_range(0..=expected_num_moves)
-      .max(rng.random_range(0..=expected_num_moves));
+      .random_range(min_initial_moves..=expected_num_moves)
+      .max(rng.random_range(min_initial_moves..=expected_num_moves));
     let depth = rng
       .random_range(0..=expected_num_moves)
       .max(rng.random_range(0..=expected_num_moves));

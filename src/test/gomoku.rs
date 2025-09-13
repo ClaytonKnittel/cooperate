@@ -5,7 +5,7 @@ use std::{
 
 use abstract_game::{Game, GameMoveIterator, GamePlayer, GameResult};
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GomokuMove {
   x: u32,
   y: u32,

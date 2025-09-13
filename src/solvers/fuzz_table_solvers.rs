@@ -11,9 +11,12 @@ use googletest::gtest;
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::solvers::{
-  iter_deep::IterativeDeepening, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
-  ttable_solver::TTSolver,
+use crate::{
+  solvers::{
+    iter_deep::IterativeDeepening, simple::SimpleSolver, ttable_alpha_beta::TTAlphaBeta,
+    ttable_solver::TTSolver,
+  },
+  test::gomoku::Gomoku,
 };
 
 trait HasTable<G, S> {
@@ -75,6 +78,7 @@ fn solvers(
     (TicTacToe::new(), 9),
     (ConnectN::new(4, 3, 3), 12),
     (ConnectN::new(5, 4, 3), 20),
+    (Gomoku::new(4, 4, 4), 16),
   )]
   starting_state: (impl Game<Move: Ord>, u32),
 ) {
