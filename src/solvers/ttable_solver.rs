@@ -3,7 +3,7 @@ use std::{
   hash::{BuildHasher, Hash, RandomState},
 };
 
-use abstract_game::{Game, GameResult, Score, Solver};
+use abstract_game::{complete_solver::CompleteSolver, Game, GameResult, Score, Solver};
 
 pub struct TTSolver<G, S> {
   table: HashMap<G, Score, S>,
@@ -100,6 +100,8 @@ impl<G: Game + Hash + Eq, H: BuildHasher + Clone> Solver for TTSolver<G, H> {
       .unwrap_or((Score::lose(1), None))
   }
 }
+
+impl<G: Game + Hash + Eq, H: BuildHasher + Clone> CompleteSolver for TTSolver<G, H> {}
 
 #[cfg(test)]
 mod tests {

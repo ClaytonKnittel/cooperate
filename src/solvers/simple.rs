@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use abstract_game::{Game, GameResult, Score, Solver};
+use abstract_game::{complete_solver::CompleteSolver, Game, GameResult, Score, Solver};
 
 pub struct SimpleSolver<G>(PhantomData<G>);
 
@@ -60,6 +60,8 @@ impl<G: Game> Solver for SimpleSolver<G> {
       .unwrap_or((Score::lose(1), None))
   }
 }
+
+impl<G: Game> CompleteSolver for SimpleSolver<G> {}
 
 #[cfg(test)]
 mod tests {

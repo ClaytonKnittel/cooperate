@@ -5,7 +5,7 @@ version = 4
 [[package]]
 name = "abstract_game"
 version = "0.1.0"
-source = "git+https://github.com/ClaytonKnittel/abstract-game.git?rev=478e6357c3b36b96c629e219b04e9b068f2d4b91#478e6357c3b36b96c629e219b04e9b068f2d4b91"
+source = "git+https://github.com/ClaytonKnittel/abstract-game.git?rev=8a932345e4e35f4307a58e1e0be38e888d330553#8a932345e4e35f4307a58e1e0be38e888d330553"
 dependencies = [
  "itertools",
  "rand 0.9.2",
