@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use abstract_game::{Game, GameResult, Score, Solver};
+use abstract_game::{Game, GameResult, Score, ScoreValue, Solver};
 
 pub struct AlphaBeta<G>(PhantomData<G>);
 
@@ -9,7 +9,7 @@ impl<G: Game> AlphaBeta<G> {
     Self(PhantomData)
   }
 
-  fn score_for_game(game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn score_for_game(game: &G, depth: u32, alpha: ScoreValue, beta: ScoreValue) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
         if player == game.current_player() {
@@ -20,12 +20,12 @@ impl<G: Game> AlphaBeta<G> {
       }
       GameResult::Tie => Score::guaranteed_tie(),
       GameResult::NotFinished => {
-        Self::solve_impl(game, depth - 1, beta.forwardstep(), alpha.forwardstep()).backstep()
+        Self::solve_impl(game, depth - 1, beta.invert(), alpha.invert()).backstep()
       }
     }
   }
 
-  fn solve_impl(game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn solve_impl(game: &G, depth: u32, alpha: ScoreValue, beta: ScoreValue) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     debug_assert!(alpha <= beta);
     if depth == 0 {
@@ -34,9 +34,9 @@ impl<G: Game> AlphaBeta<G> {
 
     let mut best_score = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
-      let score = Self::score_for_game(&next_game, depth, alpha.max(best_score), beta);
+      let score = Self::score_for_game(&next_game, depth, alpha.max(best_score.score()), beta);
       best_score = best_score.max(score);
-      if score > beta {
+      if score.score() > beta {
         // TODO: This is necessary for correctness, need a test that fails without this.
         // best_score = best_score.break_early();
         break;
@@ -56,14 +56,14 @@ impl<G: Game> Solver for AlphaBeta<G> {
       return (Score::NO_INFO, None);
     }
 
-    let mut alpha = Score::lose(1);
+    let mut alpha = ScoreValue::OtherPlayerWins;
 
     game
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = Self::score_for_game(&next_game, depth, alpha, Score::win(1));
-        alpha = alpha.max(score);
+        let score = Self::score_for_game(&next_game, depth, alpha, ScoreValue::CurrentPlayerWins);
+        alpha = alpha.max(score.score());
         (score, Some(m))
       })
       .max_by_key(|(score, _)| score.clone())

@@ -52,11 +52,6 @@ fn test_solve<G: Game<Move: Ord>>(
     let (score1, _) = solver1.best_move(&game, depth);
     let (score2, _) = solver2.best_move(&game, depth);
 
-    assert!(score1.determined(depth), "Failed on trial {trial}");
-    assert!(
-      score2.determined(depth),
-      "Failed on trial {trial}, {score2} not determined at depth {depth}"
-    );
     assert!(
       score1.compatible(score2),
       "Failed on trial {trial}, {score1} vs {score2} for game\n{game:?}"

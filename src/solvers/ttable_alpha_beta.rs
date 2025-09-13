@@ -3,7 +3,7 @@ use std::{
   hash::{BuildHasher, Hash, RandomState},
 };
 
-use abstract_game::{Game, GameResult, Score, Solver};
+use abstract_game::{Game, GameResult, Score, ScoreValue, Solver};
 
 pub struct TTAlphaBeta<G, S> {
   table: HashMap<G, Score, S>,
@@ -32,8 +32,8 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
     &mut self,
     game: &G,
     depth: u32,
-    alpha: Score,
-    beta: Score,
+    alpha: ScoreValue,
+    beta: ScoreValue,
   ) -> Score {
     match game.finished() {
       GameResult::Win(player) => {
@@ -53,16 +53,9 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
       }
     }
 
-    let new_alpha = beta.forwardstep();
-    let new_beta = alpha.forwardstep();
-    if new_alpha > new_beta {
-      return Score::lose(1);
-    }
-
+    let new_alpha = beta.invert();
+    let new_beta = alpha.invert();
     let score = self.solve_impl(game, depth, new_alpha, new_beta);
-    if (!score.determined(depth) || !score.score_at_depth(depth).is_winning()) && score > new_beta {
-      return score;
-    }
 
     match self.table.entry(game.clone()) {
       Entry::Occupied(mut entry) => {
@@ -78,7 +71,7 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
     .backstep()
   }
 
-  fn solve_impl(&mut self, game: &G, depth: u32, alpha: Score, beta: Score) -> Score {
+  fn solve_impl(&mut self, game: &G, depth: u32, alpha: ScoreValue, beta: ScoreValue) -> Score {
     debug_assert!(matches!(game.finished(), GameResult::NotFinished));
     debug_assert!(alpha <= beta, "{alpha} vs {beta}");
     if depth == 0 {
@@ -88,9 +81,9 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> TTAlphaBeta<G, S> {
     let mut best_score = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
       let score =
-        self.backstepped_score_for_game(&next_game, depth - 1, alpha.max(best_score), beta);
+        self.backstepped_score_for_game(&next_game, depth - 1, alpha.max(best_score.score()), beta);
       best_score = best_score.max(score);
-      if (score.determined(depth) && score.score_at_depth(depth).is_winning()) || score > beta {
+      if score.score() >= beta {
         return best_score.break_early();
       }
     }
@@ -108,14 +101,19 @@ impl<G: Game + Hash + Eq, S: BuildHasher + Clone> Solver for TTAlphaBeta<G, S> {
       return (Score::NO_INFO, None);
     }
 
-    let mut alpha = Score::lose(1);
+    let mut alpha = ScoreValue::OtherPlayerWins;
 
     game
       .each_move()
       .map(|m| {
         let next_game = game.with_move(m);
-        let score = self.backstepped_score_for_game(&next_game, depth - 1, alpha, Score::win(1));
-        alpha = alpha.max(score);
+        let score = self.backstepped_score_for_game(
+          &next_game,
+          depth - 1,
+          alpha,
+          ScoreValue::CurrentPlayerWins,
+        );
+        alpha = alpha.max(score.score());
         (score, Some(m))
       })
       .max_by_key(|(score, _)| score.clone())
