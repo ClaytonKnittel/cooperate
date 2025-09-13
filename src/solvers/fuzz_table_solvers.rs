@@ -62,8 +62,13 @@ fn solvers(
     impl Solver + HasTable,
     impl Solver + HasTable,
   ),
-  #[values((Nim::new(20), 20), (TicTacToe::new(), 9), (ConnectN::new(4, 3, 3), 12))]
-    starting_state: (impl Game<Move: Ord>, u32),
+  #[values(
+    (Nim::new(20), 20),
+    (TicTacToe::new(), 9),
+    (ConnectN::new(4, 3, 3), 12),
+    (ConnectN::new(5, 4, 3), 20),
+  )]
+  starting_state: (impl Game<Move: Ord>, u32),
 ) {
 }
 

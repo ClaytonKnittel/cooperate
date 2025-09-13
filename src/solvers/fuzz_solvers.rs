@@ -23,7 +23,7 @@ fn solvers(
   )]
   solvers: (impl Solver, impl Solver),
   #[values((Nim::new(20), 13), (TicTacToe::new(), 8), (ConnectN::new(4, 3, 3), 11))]
-    starting_state: (impl Game<Move: Ord>, u32),
+  starting_state: (impl Game<Move: Ord>, u32),
 ) {
 }
 
