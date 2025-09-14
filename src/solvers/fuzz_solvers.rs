@@ -80,7 +80,6 @@ fn test_solve<G: Game<Move: Ord>>(
 #[rstest]
 fn determined_solvers(
   #[values(
-    (SimpleSolver::new(), AlphaBeta::new()),
     (SimpleSolver::new(), TTSolver::new()),
   )]
   solvers: (impl CompleteSolver, impl CompleteSolver),

@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use abstract_game::{complete_solver::CompleteSolver, Game, GameResult, Score, ScoreValue, Solver};
+use abstract_game::{Game, GameResult, Score, ScoreValue, Solver};
 
 pub struct AlphaBeta<G>(PhantomData<G>);
 
@@ -20,7 +20,7 @@ impl<G: Game> AlphaBeta<G> {
       }
       GameResult::Tie => Score::guaranteed_tie(),
       GameResult::NotFinished => {
-        Self::solve_impl(game, depth - 1, beta.invert(), alpha.invert()).backstep()
+        Self::solve_impl(game, depth, beta.invert(), alpha.invert()).backstep()
       }
     }
   }
@@ -32,17 +32,16 @@ impl<G: Game> AlphaBeta<G> {
       return Score::NO_INFO;
     }
 
-    let mut best_score = Score::lose(1);
+    let mut acc = Score::lose(1);
     for next_game in game.each_move().map(|m| game.with_move(m)) {
-      let score = Self::score_for_game(&next_game, depth, alpha.max(best_score.score()), beta);
-      best_score = best_score.max(score);
+      let score = Self::score_for_game(&next_game, depth - 1, alpha.max(acc.score()), beta);
+      acc = acc.accumulate(score);
       if score.score() >= beta {
-        best_score = best_score.break_early();
-        break;
+        return acc.break_early();
       }
     }
 
-    best_score
+    acc
   }
 }
 
@@ -70,8 +69,6 @@ impl<G: Game> Solver for AlphaBeta<G> {
       .unwrap_or((Score::lose(1), None))
   }
 }
-
-impl<G: Game> CompleteSolver for AlphaBeta<G> {}
 
 #[cfg(test)]
 mod tests {
