@@ -5,7 +5,7 @@ use std::{
 
 use abstract_game::{Game, GameMoveIterator, GamePlayer, GameResult, Score};
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub struct NimMove {
   sticks: u32,
 }

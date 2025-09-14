@@ -7,7 +7,7 @@ use abstract_game::{Game, GameMoveIterator, GamePlayer, GameResult, Score};
 
 use crate::test::serial_search::find_best_move_serial;
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub struct TttMove {
   x: u32,
   y: u32,
