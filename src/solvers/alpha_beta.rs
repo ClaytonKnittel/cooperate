@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use abstract_game::{Game, GameResult, Score, ScoreValue, Solver};
+use abstract_game::{complete_solver::CompleteSolver, Game, GameResult, Score, ScoreValue, Solver};
 
 pub struct AlphaBeta<G>(PhantomData<G>);
 
@@ -36,9 +36,8 @@ impl<G: Game> AlphaBeta<G> {
     for next_game in game.each_move().map(|m| game.with_move(m)) {
       let score = Self::score_for_game(&next_game, depth, alpha.max(best_score.score()), beta);
       best_score = best_score.max(score);
-      if score.score() > beta {
-        // TODO: This is necessary for correctness, need a test that fails without this.
-        // best_score = best_score.break_early();
+      if score.score() >= beta {
+        best_score = best_score.break_early();
         break;
       }
     }
@@ -71,6 +70,8 @@ impl<G: Game> Solver for AlphaBeta<G> {
       .unwrap_or((Score::lose(1), None))
   }
 }
+
+impl<G: Game> CompleteSolver for AlphaBeta<G> {}
 
 #[cfg(test)]
 mod tests {

@@ -5,11 +5,11 @@ use abstract_game::{
   },
   test_games::ConnectN,
 };
-use cooperate::solvers::ttable_solver::TTSolver;
+use cooperate::solvers::ttable_alpha_beta::TTAlphaBeta;
 
 fn main() {
   let player1 = HumanTermPlayer::new("Player 1".to_owned(), ConnectNPlayer);
-  let player2 = BotPlayer::new("Player 2".to_owned(), TTSolver::new(), 20);
+  let player2 = BotPlayer::new("Player 2".to_owned(), TTAlphaBeta::new(), 20);
   let game = ConnectN::new(5, 4, 3);
 
   let result = TermInterface::new(game, player1, player2).map(TermInterface::play);

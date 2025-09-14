@@ -9,11 +9,13 @@ use googletest::{gtest, prelude::*};
 use rstest::rstest;
 use rstest_reuse::{apply, template};
 
-use crate::solvers::{simple::SimpleSolver, ttable_solver::TTSolver};
+use crate::solvers::{alpha_beta::AlphaBeta, simple::SimpleSolver, ttable_solver::TTSolver};
 
 #[template]
 #[rstest]
-fn complete_solvers(#[values(SimpleSolver::new(), TTSolver::new())] solver: (impl CompleteSolver)) {
+fn complete_solvers(
+  #[values(SimpleSolver::new(), AlphaBeta::new(), TTSolver::new())] solver: (impl CompleteSolver),
+) {
 }
 
 #[apply(complete_solvers)]
@@ -22,7 +24,7 @@ fn test_solve(mut solver: impl CompleteSolver + Solver<Game = TicTacToe>) {
   let mut ttt = TicTacToe::new();
   {
     let (score, m) = solver.best_move_determined(&ttt, 9);
-    expect_eq!(score, DeterminedScore::tie(), "{score}");
+    expect_eq!(score, DeterminedScore::guaranteed_tie(), "{score}");
     expect_that!(m, some(anything()));
   }
 
@@ -32,7 +34,7 @@ fn test_solve(mut solver: impl CompleteSolver + Solver<Game = TicTacToe>) {
   ttt.make_move(TTTMove::new((0, 0)));
   {
     let (score, m) = solver.best_move_determined(&ttt, 8);
-    expect_eq!(score, DeterminedScore::tie(), "{score}");
+    expect_eq!(score, DeterminedScore::guaranteed_tie(), "{score}");
     expect_that!(
       m,
       some(any![
